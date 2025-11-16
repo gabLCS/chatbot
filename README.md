@@ -25,10 +25,15 @@ O Gemini, por outro lado, oferece uma camada gratuita mais generosa, facilitando
 ## Estrutura do Projeto
 
 /
+
 ├── main.py
+
 ├── requirements.txt
+
 ├── start.sh
+
 └── README.md
+
 
 ---
 
@@ -179,6 +184,7 @@ ou via POST:
 http://SEU_IP_PUBLICO:8000/chat
 
 ---
+
 
 
 
