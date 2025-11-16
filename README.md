@@ -112,7 +112,7 @@ echo "GEMINI_API_KEY=SUA_CHAVE" > .env
 
 ---
 
-# ▶ 4. start.sh (script para iniciar a API)
+# 4. start.sh (script para iniciar a API)
 
 Conteúdo do start.sh:
 
@@ -184,6 +184,7 @@ ou via POST:
 http://SEU_IP_PUBLICO:8000/chat
 
 ---
+
 
 
 
