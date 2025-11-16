@@ -39,8 +39,11 @@ git clone https://github.com/SEU-USUARIO/chatbot.git
 cd chatbot
 
 ## 1.2 Criar ambiente virtual
+
 python3 -m venv venv
+
 source venv/bin/activate  # Linux/Mac
+
 venv\Scripts\activate     # Windows
 
 ## 1.3 Instalar dependências
@@ -155,4 +158,5 @@ ou via POST:
 http://SEU_IP_PUBLICO:8000/chat
 
 ---
+
 
