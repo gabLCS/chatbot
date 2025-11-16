@@ -1,4 +1,4 @@
-# 🚀 Chatbot Multiusuário com Memória (FastAPI + LangChain + Gemini)
+# Chatbot Multiusuário com Memória (FastAPI + LangChain + Gemini)
 
 API Python simples para chatbot com múltiplas sessões independentes, usando Google Gemini via LangChain e memória por sessão.
 Este projeto é uma aplicação completa de chat com memória contínua, construída utilizando FastAPI no backend e React no frontend.
@@ -62,7 +62,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ---
 
-# 🧠 2. Endpoints
+#  2. Endpoints
 
 ## Criar sessão
 GET /session
@@ -86,7 +86,7 @@ Resposta:
 
 ---
 
-# 📦 3. Configurar servidor
+#  3. Configurar servidor
 
 ## 3.1 Atualizar servidor
 sudo apt update && sudo apt upgrade -y
@@ -184,6 +184,7 @@ ou via POST:
 http://SEU_IP_PUBLICO:8000/chat
 
 ---
+
 
 
 
