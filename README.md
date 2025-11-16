@@ -90,7 +90,9 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install python3 python3-venv python3-pip git -y
 
 ## 3.3 Clonar repositório
+
 git clone https://github.com/SEU-USUARIO/chatbot-multiuser.git
+
 cd chatbot-multiuser
 
 ## 3.4 Criar ambiente virtual
@@ -108,10 +110,15 @@ echo "GEMINI_API_KEY=SUA_CHAVE" > .env
 # ▶ 4. start.sh (script para iniciar a API)
 
 Conteúdo do start.sh:
+
 #!/bin/bash
+
 cd /home/ubuntu/chatbot-multiuser
+
 source venv/bin/activate
+
 uvicorn main:app --host 0.0.0.0 --port 8000
+
 
 Tornar executável:
 chmod +x start.sh
@@ -172,6 +179,7 @@ ou via POST:
 http://SEU_IP_PUBLICO:8000/chat
 
 ---
+
 
 
 
