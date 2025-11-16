@@ -40,25 +40,35 @@ O Gemini, por outro lado, oferece uma camada gratuita mais generosa, facilitando
 # 1. Instalação Local
 
 ## 1.1 Clone o repositório
-git clone https://github.com/SEU-USUARIO/chatbot.git
+```bash
+git clone https://github.com/gabLCS/chatbot.git
 cd chatbot
+```
+
+
 
 ## 1.2 Criar ambiente virtual
 
+```bash
 python3 -m venv venv
-
 source venv/bin/activate  # Linux/Mac
-
 venv\Scripts\activate     # Windows
+```
 
 ## 1.3 Instalar dependências
+```bash
 pip install -r requirements.txt
+```
+
 
 ## 1.4 Criar arquivo .env
 GEMINI_API_KEY=SUA_CHAVE_AQUI
 
 ## 1.5 Rodar a API
+```bash
 uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
 
 ---
 
@@ -89,33 +99,52 @@ Resposta:
 #  3. Configurar servidor
 
 ## 3.1 Atualizar servidor
+```bash
 sudo apt update && sudo apt upgrade -y
+```
+
 
 ## 3.2 Instalar dependências
+```bash
 sudo apt install python3 python3-venv python3-pip git -y
+```
+
 
 ## 3.3 Clonar repositório
+```bash
+git clone https://github.com/gabLCS/chatbot.git
+cd chatbot
+```
 
-git clone https://github.com/SEU-USUARIO/chatbot-multiuser.git
 
-cd chatbot-multiuser
+
 
 ## 3.4 Criar ambiente virtual
+```bash
 python3 -m venv venv
 source venv/bin/activate
+```
+
+
 
 ## 3.5 Instalar dependências
+```bash
 pip install -r requirements.txt
+```
+
 
 ## 3.6 Criar .env
+```bash
 echo "GEMINI_API_KEY=SUA_CHAVE" > .env
+```
+
 
 ---
 
 # 4. start.sh (script para iniciar a API)
 
 Conteúdo do start.sh:
-
+```bash
 #!/bin/bash
 
 cd /home/ubuntu/chatbot-multiuser
@@ -123,22 +152,31 @@ cd /home/ubuntu/chatbot-multiuser
 source venv/bin/activate
 
 uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+
 
 
 Tornar executável:
+```bash
 chmod +x start.sh
+```
+
 
 ---
 
 # 5. Iniciar automaticamente com systemd
 
 ## Criar serviço
-
+```bash
 sudo nano /etc/systemd/system/chatbot.service
+```
+
+
 
 
 Conteúdo:
-
+```bash
 [Unit]
 
 Description=Chatbot Multiuser API
@@ -167,23 +205,28 @@ sudo systemctl daemon-reload
 sudo systemctl enable chatbot
 
 sudo systemctl start chatbot
+```
+
+
 
 ## Ver logs
+```bash
 journalctl -u chatbot -f
+```
+
 
 ---
 
 # 6. Acesso público
 
 Após iniciar a API, acesse:
+```bash
+http://SEU_IP_PUBLICO:8000
+```
 
-http://SEU_IP_PUBLICO:8000/session
-
-ou via POST:
-
-http://SEU_IP_PUBLICO:8000/chat
 
 ---
+
 
 
 
