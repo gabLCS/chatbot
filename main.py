@@ -69,7 +69,7 @@ def chat(msg: Message):
     return {"answer": response.content}
 
 
-# ✅ NOVO ENDPOINT: Retorna o histórico completo da sessão
+
 @app.get("/history/{session_id}")
 def get_session_history(session_id: str):
 
@@ -78,7 +78,6 @@ def get_session_history(session_id: str):
 
     history_obj = store[session_id]
 
-    # O objeto InMemoryChatMessageHistory armazena mensagens em history.messages
     history_list = [
         {"role": msg.type, "content": msg.content}
         for msg in history_obj.messages
@@ -88,3 +87,4 @@ def get_session_history(session_id: str):
         "sessionId": session_id,
         "history": history_list
     }
+
