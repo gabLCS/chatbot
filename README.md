@@ -121,25 +121,39 @@ chmod +x start.sh
 # 5. Iniciar automaticamente com systemd
 
 ## Criar serviço
+
 sudo nano /etc/systemd/system/chatbot.service
 
+
 Conteúdo:
+
 [Unit]
+
 Description=Chatbot Multiuser API
+
 After=network.target
 
+
 [Service]
+
 User=ubuntu
+
 WorkingDirectory=/home/ubuntu/chatbot-multiuser
+
 ExecStart=/home/ubuntu/chatbot-multiuser/start.sh
+
 Restart=always
+
 
 [Install]
 WantedBy=multi-user.target
 
 ## Ativar serviço
+
 sudo systemctl daemon-reload
+
 sudo systemctl enable chatbot
+
 sudo systemctl start chatbot
 
 ## Ver logs
@@ -158,5 +172,6 @@ ou via POST:
 http://SEU_IP_PUBLICO:8000/chat
 
 ---
+
 
 
