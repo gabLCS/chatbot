@@ -19,6 +19,12 @@ O Gemini, por outro lado, oferece uma camada gratuita mais generosa, facilitando
 - Hospedar em AWS EC2
 - Iniciar automaticamente como serviço systemd
 - Endpoint público acessível pela internet
+- Autenticação JWT Segura: Gerencia sessões de usuário utilizando JSON Web Tokens (JWT).
+- Registro Completo: Inclui validação de Nome de Usuário, Email e Confirmação de Senha.
+- Hashing Moderno: Senhas armazenadas com hashing SCrypt (via passlib), sem o limite de 72 bytes do Bcrypt.
+- Persistência SQL: Usuários e Metadados de Conversa (título, user_id) persistidos em banco de dados SQLite (via SQLAlchemy).
+- Memória por Usuário/Sessão: Histórico de chat isolado e persistente usando SQLChatMessageHistory.
+- CORS: Configuração de middleware CORS para permitir comunicação com o Frontend.
 
 ---
 
@@ -33,6 +39,11 @@ O Gemini, por outro lado, oferece uma camada gratuita mais generosa, facilitando
 |- start.sh
 
 |- README.md
+
+|- frontend/
+    |- index.html
+    |- style.css
+
 
 
 ---
@@ -74,25 +85,89 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 #  2. Endpoints
 
-## Criar sessão
-GET /session
+## Cadastro de Usuário
+```bash
+POST /register
+```
 
-Resposta:
-{ "sessionId": "UUID" }
-
-## Enviar mensagem
-POST /chat
 
 Body:
+```bash
 {
-  "sessionId": "ID_DA_SESSAO",
-  "message": "sua mensagem"
+  "username": "usuario",
+  "email": "email@dominio.com",
+  "password": "senha_forte",
+  "password_confirm": "senha_forte"
+}
+```
+
+## Login e Geração de Token
+
+```bash
+{
+POST /login
+}
+```
+Body:
+```bash
+
+{
+  "username": "usuario",
+  "password": "senha_forte"
 }
 
+```
+
+
+
 Resposta:
+```bash
+
 {
-  "answer": "resposta do modelo"
+  "access_token": "eyJhbGciOiJIUzI1Ni...", 
+  "token_type": "bearer",
+  "user_id": 1,
+  "username": "usuario"
 }
+
+```
+
+
+Criar Nova Sessão
+```bash
+POST /session
+```
+
+
+
+Resposta:
+```bash
+{ "sessionId": "UUID_DA_NOVA_SESSAO", "title": "Novo Chat" }
+```
+
+
+Enviar Mensagem (Autenticado)
+
+
+```bash
+POST /chat
+```
+
+Body:
+```bash
+{
+  "conversationId": "ID_DA_SESSAO",
+  "message": "sua mensagem"
+}
+```
+
+
+
+Resposta:
+```bash
+{ "answer": "resposta do modelo" }
+```
+
 
 ---
 
@@ -106,7 +181,9 @@ sudo apt update && sudo apt upgrade -y
 
 ## 3.2 Instalar dependências
 ```bash
-sudo apt install python3 python3-venv python3-pip git -y
+sudo apt update
+sudo apt install python3 python3-pip git nginx -y
+pip install gunicorn
 ```
 
 
@@ -138,6 +215,61 @@ pip install -r requirements.txt
 echo "GEMINI_API_KEY=SUA_CHAVE" > .env
 ```
 
+## 3.7 Configurar Nginx (Proxy Reverso)
+Crie o arquivo de configuração Nginx:
+```bash
+sudo nano /etc/nginx/sites-available/chat_app
+```
+Conteúdo (Ajuste o caminho e o nome do servidor):
+```bash
+server {
+    listen 80;
+    server_name _; # Usa wildcard para capturar o IP dinâmico da EC2
+
+    # Servir arquivos estáticos (Frontend)
+    location / {
+        root /home/ubuntu/seu_projeto/frontend;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Proxy Reverso para a API FastAPI (Porta 8000)
+    location /login {
+        proxy_pass [http://127.0.0.1:8000](http://127.0.0.1:8000);
+        proxy_set_header Host $host;
+    }
+
+    location /register {
+        proxy_pass [http://127.0.0.1:8000](http://127.0.0.1:8000);
+        proxy_set_header Host $host;
+    }
+
+    # Rotas autenticadas
+    location /chat {
+        proxy_pass [http://127.0.0.1:8000](http://127.0.0.1:8000);
+        proxy_set_header Host $host;
+    }
+    
+    location /session {
+        proxy_pass [http://127.0.0.1:8000](http://127.0.0.1:8000);
+        proxy_set_header Host $host;
+    }
+    
+    location /history {
+        proxy_pass [http://127.0.0.1:8000](http://127.0.0.1:8000);
+        proxy_set_header Host $host;
+    }
+}
+
+```
+
+Ative e reinicie o Nginx:
+```bash
+sudo ln -s /etc/nginx/sites-available/chat_app /etc/nginx/sites-enabled/
+sudo unlink /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx
+```
 
 ---
 
@@ -147,11 +279,13 @@ Conteúdo do start.sh:
 ```bash
 #!/bin/bash
 
-cd /home/ubuntu/chatbot-multiuser
+PROJECT_DIR="/home/ubuntu/chatbot-multiuser"
+
+cd $PROJECT_DIR
 
 source venv/bin/activate
 
-uvicorn main:app --host 0.0.0.0 --port 8000
+gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 ```
 
 
@@ -219,13 +353,21 @@ journalctl -u chatbot -f
 
 # 6. Acesso público
 
-Após iniciar a API, acesse:
+4. Acesso Público
+
+Após a configuração do Nginx, acesse sua aplicação web pelo navegador sem especificar a porta:
+
 ```bash
-http://SEU_IP_PUBLICO:8000
+http://SEU_IP_PUBLICO
 ```
 
 
+Lembre-se de atualizar a variável API_BASE no seu index.html para http://SEU_IP_PUBLICO.
+
+
+
 ---
+
 
 
 
