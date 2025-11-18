@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦧</text></svg>">
+</head>
+<body>
+
+    <main id="app-container">
+        </main>
+
+    <script>
+        // --- Variáveis Globais de Estado ---
+        let USER_ID = localStorage.getItem('user_id') || null;
+        let USERNAME = localStorage.getItem('username') || null;
+        let CURRENT_CONVERSATION_ID = null;
+
+        const API_BASE = "http://127.0.0.1:8000"; // Ajuste se seu servidor rodar em outra porta
+
+        // --- Funções de Renderização da UI ---
+
+        function renderLogin() {
+            document.getElementById('app-container').innerHTML = `
+                <div class="auth-container">
+                    <h2>🦧 Bem-vindo ao Chat AI</h2>
+                    <div class="form-card">
+                        <h3>Login</h3>
+                        <form id="login-form">
+                            <input type="text" id="login-username" placeholder="Usuário" required>
+                            <input type="password" id="login-password" placeholder="Senha" required>
+                            <button type="submit">Entrar</button>
+                        </form>
+                        <p>Não tem conta? <a href="#" onclick="renderRegister()">Cadastre-se</a></p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+        }
+
+
+        function renderRegister() {
+    document.getElementById('app-container').innerHTML = `
+        <div class="auth-container">
+            <h2>🦧 Bem-vindo ao Chat AI</h2>
+            <div class="form-card">
+                <h3>Cadastro</h3>
+                <form id="register-form">
+                    <input type="text" id="register-username" placeholder="Usuário" required>
+                    <input type="email" id="register-email" placeholder="Email" required>
+                    <input type="password" id="register-password" placeholder="Senha" required>
+                    <input type="password" id="register-password-confirm" placeholder="Confirmar Senha" required>
+                    <button type="submit">Cadastrar</button>
+                </form>
+                <p>Já tem conta? <a href="#" onclick="renderLogin()">Fazer Login</a></p>
+            </div>
+        </div>
+    `;
+    document.getElementById('register-form').addEventListener('submit', handleRegister);
+}
+
+        async function renderChatApp() {
+            if (!USER_ID) return renderLogin(); // Garante que o usuário está logado
+
+            document.getElementById('app-container').innerHTML = `
+                <div class="chat-layout">
+                    <aside class="sidebar">
+                        <header>
+                            <h4>Olá, ${USERNAME}!</h4>
+                            <button onclick="handleNewChat()">➕ Novo Chat</button>
+                            <button class="logout-btn" onclick="handleLogout()">Sair</button>
+                        </header>
+                        <h3>Histórico</h3>
+                        <ul id="conversation-history">
+                            </ul>
+                    </aside>
+
+                    <section class="chat-main">
+                        <div id="chat-header">
+                            <h2 id="chat-title">Nenhuma Conversa Selecionada</h2>
+                        </div>
+                        <div id="messages-container" class="messages-container">
+                            <div class="welcome-message">
+                                Selecione ou inicie uma nova conversa para começar.
+                            </div>
+                        </div>
+                        <form id="chat-form" class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Pergunte algo ao Gemini..." required disabled>
+                            <button type="submit" id="send-btn" disabled>Enviar</button>
+                        </form>
+                    </section>
+                </div>
+            `;
+            
+            await loadConversations();
+
+            // Adiciona listener para envio de mensagem
+            document.getElementById('chat-form').addEventListener('submit', handleSendMessage);
+        }
+
+        // --- Funções de Lógica e API ---
+        function authenticatedFetch(url, options = {}) {
+    const token = localStorage.getItem('access_token');
+    
+    if (!token) {
+        // Redireciona para o login se não houver token
+        alert("Sessão expirada ou não autenticada. Faça login novamente.");
+        handleLogout();
+        throw new Error("Não autenticado");
+    }
+
+    const headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}` // FORMATO PADRÃO JWT
+    };
+
+    return fetch(url, { ...options, headers });
+}
+
+        async function handleLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        // 🚨 CRÍTICO: Usamos 'fetch' padrão para rotas públicas como /login
+        const response = await fetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Falha no login: ${errorData.detail}`);
+            return;
+        }
+
+        const data = await response.json();
+        
+        // 1. Armazena o token JWT
+        localStorage.setItem('access_token', data.access_token);
+        
+        // 2. Armazena ID e Username para conveniência da UI
+        USER_ID = data.user_id; 
+        USERNAME = data.username;
+        localStorage.setItem('user_id', USER_ID);
+        localStorage.setItem('username', USERNAME);
+        
+        // 3. Renderiza a aplicação principal
+        await renderChatApp();
+
+    } catch (error) {
+        console.error('Erro ao tentar logar:', error);
+        // Este erro só ocorre se a conexão HTTP inicial falhar (servidor inativo, CORS não configurado, etc.)
+        alert('Erro de conexão com o servidor. Verifique se o backend está ativo.');
+    }
+}
+
+        async function handleRegister(event) {
+    event.preventDefault();
+    const username = document.getElementById('register-username').value;
+    const email = document.getElementById('register-email').value; // NOVO CAMPO
+    const password = document.getElementById('register-password').value;
+    const password_confirm = document.getElementById('register-password-confirm').value; 
+
+    // Verificação de igualdade de senha (melhor prática de UX)
+    if (password !== password_confirm) {
+        alert('As senhas digitadas não coincidem. Verifique e tente novamente.');
+        return; 
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username, 
+                email, // ENVIANDO O E-MAIL
+                password,
+                password_confirm 
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            
+            // Tratamento específico se a verificação Pydantic falhar (status 422)
+            if (response.status === 422) {
+                 alert('Falha no cadastro: As senhas não coincidem (Verificação do Servidor).');
+            } else {
+                 alert(`Falha no cadastro: ${errorData.detail || errorData.detail[0].msg}`);
+            }
+            return;
+        }
+
+        alert('Cadastro realizado com sucesso! Faça login.');
+        renderLogin();
+
+    } catch (error) {
+        console.error('Erro ao tentar cadastrar:', error);
+        alert('Erro de conexão com o servidor.');
+    }
+}
+
+        function handleLogout() {
+            USER_ID = null;
+            USERNAME = null;
+            CURRENT_CONVERSATION_ID = null;
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('username');
+            renderLogin();
+        }
+        
+        async function loadConversations() {
+            const historyList = document.getElementById('conversation-history');
+            historyList.innerHTML = '<li>Carregando...</li>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/history/${USER_ID}`);
+                const conversations = await response.json();
+
+                historyList.innerHTML = ''; // Limpa a lista
+                if (conversations.length === 0) {
+                    historyList.innerHTML = '<li class="no-conversations">Nenhuma conversa.</li>';
+                    return;
+                }
+
+                conversations.forEach(conv => {
+                    const li = document.createElement('li');
+                    li.textContent = conv.title;
+                    li.dataset.id = conv.id;
+                    li.className = 'conversation-item';
+                    if (conv.id === CURRENT_CONVERSATION_ID) {
+                         li.classList.add('active');
+                    }
+                    li.onclick = () => selectConversation(conv.id, conv.title);
+                    historyList.appendChild(li);
+                });
+
+                // Se houver conversas, seleciona a primeira ou a atual
+                if (conversations.length > 0 && !CURRENT_CONVERSATION_ID) {
+                    selectConversation(conversations[0].id, conversations[0].title);
+                } else if (CURRENT_CONVERSATION_ID) {
+                    // Recarrega o histórico da conversa atual
+                    const currentConv = conversations.find(c => c.id === CURRENT_CONVERSATION_ID);
+                    if (currentConv) {
+                        selectConversation(CURRENT_CONVERSATION_ID, currentConv.title, false);
+                    }
+                }
+
+
+            } catch (error) {
+                console.error('Erro ao carregar histórico:', error);
+                historyList.innerHTML = '<li class="error">Erro ao carregar.</li>';
+            }
+        }
+
+        async function selectConversation(convId, title, shouldLoadHistory = true) {
+            CURRENT_CONVERSATION_ID = convId;
+            document.getElementById('chat-title').textContent = title;
+            document.getElementById('chat-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            
+            // Atualiza classe ativa na sidebar
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.id === convId) {
+                    item.classList.add('active');
+                }
+            });
+            
+            if (shouldLoadHistory) {
+                await loadConversationHistory(convId);
+            }
+        }
+
+        async function loadConversationHistory(convId) {
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = '<div class="loading-message">Carregando mensagens...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/conversation/${convId}`);
+                const data = await response.json();
+
+                messagesContainer.innerHTML = ''; // Limpa a área
+                data.history.forEach(msg => appendMessage(msg.role, msg.content, false));
+                messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll para o final
+                
+            } catch (error) {
+                console.error('Erro ao carregar histórico da conversa:', error);
+                messagesContainer.innerHTML = '<div class="error-message">Erro ao carregar histórico.</div>';
+            }
+        }
+
+        async function handleNewChat() {
+            try {
+                const response = await authenticatedFetch(`${API_BASE}/session?user_id=${USER_ID}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) throw new Error('Falha ao criar nova sessão');
+                
+                const data = await response.json();
+                
+                // Atualiza o estado
+                CURRENT_CONVERSATION_ID = data.sessionId;
+                
+                // Recarrega a UI
+                await loadConversations();
+                selectConversation(data.sessionId, data.title);
+                document.getElementById('messages-container').innerHTML = ''; // Limpa as mensagens
+                
+            } catch (error) {
+                console.error('Erro ao iniciar novo chat:', error);
+                alert('Não foi possível iniciar um novo chat.');
+            }
+        }
+
+        async function handleSendMessage(event) {
+            event.preventDefault();
+            
+            if (!CURRENT_CONVERSATION_ID) {
+                alert('Inicie ou selecione uma conversa primeiro.');
+                return;
+            }
+            
+            const inputElement = document.getElementById('chat-input');
+            const message = inputElement.value.trim();
+            if (!message) return;
+
+            // 1. Adiciona a mensagem do usuário
+            appendMessage('human', message);
+            inputElement.value = ''; // Limpa o input
+            
+            // Desabilita input e botão enquanto espera a resposta
+            const sendButton = document.getElementById('send-btn');
+            inputElement.disabled = true;
+            sendButton.disabled = true;
+            
+            // 2. Adiciona um placeholder para a resposta do AI
+            const aiPlaceholderId = `ai-temp-${Date.now()}`;
+            appendMessage('ai', '...', true, aiPlaceholderId); 
+            
+            try {
+                const response = await authenticatedFetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        conversationId: CURRENT_CONVERSATION_ID,
+                        message: message,
+                        userId: USER_ID
+                    })
+                });
+
+                if (!response.ok) throw new Error('Erro na resposta do chat');
+                
+                const data = await response.json();
+                const aiResponse = data.answer;
+                
+                // 3. Substitui o placeholder pela resposta real
+                const placeholder = document.getElementById(aiPlaceholderId);
+                if (placeholder) {
+                    placeholder.querySelector('.message-content').textContent = aiResponse;
+                } else {
+                    // Fallback, caso o placeholder tenha sido removido/perdido
+                    appendMessage('ai', aiResponse);
+                }
+                
+                // Lógica de titulação (opcional, pode ser feita no backend)
+                // Se o título for 'Nova Conversa' e for a primeira interação, você pode pedir ao backend para gerar um título.
+
+            } catch (error) {
+                console.error('Erro ao enviar mensagem:', error);
+                // Substitui placeholder por mensagem de erro
+                const placeholder = document.getElementById(aiPlaceholderId);
+                if (placeholder) {
+                    placeholder.querySelector('.message-content').textContent = '⚠️ Erro ao obter resposta.';
+                    placeholder.classList.add('error');
+                } else {
+                    appendMessage('ai', '⚠️ Erro ao obter resposta.');
+                }
+            } finally {
+                // Re-habilita input e botão
+                inputElement.disabled = false;
+                sendButton.disabled = false;
+                inputElement.focus();
+                
+                // Scroll para o final
+                document.getElementById('messages-container').scrollTop = document.getElementById('messages-container').scrollHeight;
+                
+                // Se for a primeira mensagem, tenta atualizar o título da conversa na sidebar
+                // Lógica simplificada: se o título for "Nova Conversa" (padrão do backend), atualiza.
+                if (document.getElementById('chat-title').textContent === 'Nova Conversa') {
+                    updateTitleOnFirstMessage(message);
+                }
+            }
+        }
+
+        function appendMessage(role, content, isPlaceholder = false, id = null) {
+            const container = document.getElementById('messages-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${role}`;
+            if (id) messageDiv.id = id;
+
+            let icon = role === 'human' ? '👤' : '🦧';
+            
+            // Simples formatação de Markdown (opcional: usar uma lib como `marked.js` para melhor suporte)
+            const formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    <span class="message-icon">${icon}</span>
+                    <div class="message-content">${isPlaceholder ? content : formattedContent}</div>
+                </div>
+            `;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Função para tentar atualizar o título da conversa após a primeira interação
+        async function updateTitleOnFirstMessage(firstMessage) {
+            // Lógica simples de titulação no frontend (apenas 3 primeiras palavras)
+            const newTitle = firstMessage.split(' ').slice(0, 3).join(' ') + '...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/conversation/${CURRENT_CONVERSATION_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle })
+                });
+                
+                if (response.ok) {
+                    // Atualiza a UI
+                    document.getElementById('chat-title').textContent = newTitle;
+                    // Recarrega o histórico da sidebar para refletir o novo título
+                    await loadConversations(); 
+                }
+                
+            } catch (error) {
+                console.error('Falha ao atualizar título:', error);
+            }
+        }
+
+
+        // --- Inicialização ---
+        if (USER_ID) {
+            renderChatApp();
+        } else {
+            renderLogin();
+        }
+    </script>
+</body>
+</html>
