@@ -362,11 +362,10 @@ http://SEU_IP_PUBLICO
 ```
 
 
-Lembre-se de atualizar a variável API_BASE no seu index.html para http://SEU_IP_PUBLICO.
-
 
 
 ---
+
 
 
 
