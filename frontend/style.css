@@ -1,11 +1,12 @@
 :root {
-    --primary-color: #3b82f6; /* Azul moderno */
-    --secondary-color: #1f2937; /* Cinza escuro para fundo */
-    --text-color: #e5e7eb;
-    --bg-light: #4b5563;
-    --bg-dark: #111827;
-    --ai-bubble: #374151;
-    --user-bubble: #3b82f6;
+    /* Cores Claras para o Tema WhatsApp */
+    --primary-color: #075E54; /* Verde escuro do WhatsApp (para botões/cabeçalhos) */
+    --secondary-color: #FFFFFF; /* Branco para fundo de elementos principais (sidebar/input/card) */
+    --text-color: #1f2937; /* Cinza escuro para texto principal */
+    --bg-light: #E5DDD5; /* Fundo geral do chat (como o fundo texturizado) */
+    --bg-dark: #F0F0F0; /* Fundo de tela geral (ligeiramente mais claro) */
+    --ai-bubble: #FFFFFF; /* Bolha do Assistente (Branco) */
+    --user-bubble: #DCF8C6; /* Bolha do Usuário (Verde Claro) */
     --sidebar-width: 280px;
 }
 
@@ -13,11 +14,11 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 body {
-    background-color: var(--bg-dark);
+    background-color: var(--bg-light); /* Fundo geral claro */
     color: var(--text-color);
     min-height: 100vh;
     display: flex;
@@ -46,40 +47,43 @@ body {
 .auth-container h2 {
     font-size: 2.5em;
     font-weight: 700;
+    color: var(--primary-color);
 }
 
 .form-card {
-    background-color: var(--secondary-color);
+    background-color: var(--secondary-color); /* Branco */
     padding: 40px;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra mais suave */
     width: 100%;
     max-width: 400px;
+    border: 1px solid #e0e0e0;
 }
 
 .form-card h3 {
     margin-bottom: 20px;
     text-align: center;
     font-size: 1.5em;
+    color: var(--text-color);
 }
 
 form input[type="text"],
 form input[type="password"],
-form input[type="email"] { /* <<--- ADICIONE ESTA LINHA */
+form input[type="email"] { 
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
-    border: 1px solid var(--bg-light);
+    border: 1px solid #ccc;
     border-radius: 6px;
-    background-color: var(--bg-light); /* Fundo escuro */
-    color: var(--text-color); /* Texto claro */
+    background-color: #f9f9f9; /* Fundo de input quase branco */
+    color: var(--text-color);
     font-size: 1em;
 }
 
 form button {
     width: 100%;
     padding: 12px;
-    background-color: var(--primary-color);
+    background-color: #25d366; /* Verde de envio do WhatsApp */
     color: white;
     border: none;
     border-radius: 6px;
@@ -90,7 +94,7 @@ form button {
 }
 
 form button:hover {
-    background-color: #2563eb;
+    background-color: #128c7e; /* Verde escuro ao passar o mouse */
 }
 
 .form-card p {
@@ -114,29 +118,30 @@ form button:hover {
 /* Sidebar (Histórico) */
 .sidebar {
     width: var(--sidebar-width);
-    background-color: var(--secondary-color);
+    background-color: var(--secondary-color); /* Branco */
     padding: 20px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--bg-light);
+    border-right: 1px solid #ccc;
 }
 
 .sidebar header {
     padding-bottom: 20px;
-    border-bottom: 1px solid var(--bg-light);
+    border-bottom: 1px solid #ccc;
     margin-bottom: 20px;
 }
 
 .sidebar h4 {
     margin-bottom: 10px;
     font-weight: 400;
+    color: var(--text-color);
 }
 
 .sidebar button {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
-    background-color: var(--primary-color);
+    background-color: #128C7E; /* Verde escuro */
     color: white;
     border: none;
     border-radius: 6px;
@@ -144,18 +149,23 @@ form button:hover {
     transition: background-color 0.2s;
 }
 
+.sidebar button:hover {
+    background-color: #075E54;
+}
+
 .sidebar button.logout-btn {
-    background-color: transparent;
-    border: 1px solid var(--bg-light);
+    background-color: #F0F0F0;
+    border: 1px solid #ccc;
     color: var(--text-color);
 }
 .sidebar button.logout-btn:hover {
-    background-color: var(--bg-light);
+    background-color: #e0e0e0;
 }
 
 .sidebar h3 {
     font-size: 1.2em;
     margin-bottom: 10px;
+    color: var(--text-color);
 }
 
 #conversation-history {
@@ -175,15 +185,17 @@ form button:hover {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text-color);
 }
 
 .conversation-item:hover {
-    background-color: var(--bg-light);
+    background-color: #F0F0F0;
 }
 
 .conversation-item.active {
-    background-color: var(--primary-color);
+    background-color: #B3E5C7; /* Verde claro suave para item ativo */
     font-weight: 600;
+    color: #075E54;
 }
 
 /* Chat Main Area */
@@ -192,13 +204,14 @@ form button:hover {
     display: flex;
     flex-direction: column;
     position: relative;
-    background-color: var(--bg-dark);
+    background-color: var(--bg-light); /* Fundo com textura de papel de parede do WhatsApp */
 }
 
 #chat-header {
     padding: 15px 25px;
-    border-bottom: 1px solid var(--secondary-color);
-    background-color: var(--secondary-color);
+    border-bottom: 1px solid #075E54;
+    background-color: var(--primary-color); /* Verde escuro */
+    color: white;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -213,13 +226,13 @@ form button:hover {
 .messages-container {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 20px 25px 100px 25px; /* Padding extra para a área de input */
+    padding: 20px 25px 100px 25px; 
 }
 
 .welcome-message, .loading-message, .error-message {
     text-align: center;
     padding: 50px;
-    color: var(--bg-light);
+    color: #555;
 }
 
 .chat-message {
@@ -238,23 +251,24 @@ form button:hover {
 .message-bubble {
     max-width: 70%;
     padding: 12px 15px;
-    border-radius: 18px;
+    border-radius: 8px; /* Mais quadrado que o padrão antigo */
     display: flex;
     align-items: flex-start;
     gap: 10px;
     line-height: 1.5;
+    box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13); /* Sombra de bolha de chat */
 }
 
 .chat-message.human .message-bubble {
-    background-color: var(--user-bubble);
-    color: white;
-    border-bottom-right-radius: 4px;
+    background-color: var(--user-bubble); /* Verde Claro */
+    color: var(--text-color);
+    border-bottom-right-radius: 4px; /* Ponta triangular sutil */
 }
 
 .chat-message.ai .message-bubble {
-    background-color: var(--ai-bubble);
+    background-color: var(--ai-bubble); /* Branco */
     color: var(--text-color);
-    border-bottom-left-radius: 4px;
+    border-bottom-left-radius: 4px; /* Ponta triangular sutil */
 }
 
 .message-icon {
@@ -272,9 +286,9 @@ form button:hover {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 15px 25px;
-    background-color: var(--secondary-color);
-    border-top: 1px solid var(--bg-light);
+    padding: 10px 15px;
+    background-color: #F0F0F0; /* Fundo cinza claro da barra de input */
+    border-top: 1px solid #e0e0e0;
     display: flex;
     gap: 10px;
 }
@@ -282,24 +296,66 @@ form button:hover {
 .chat-input-area #chat-input {
     flex-grow: 1;
     padding: 12px 15px;
-    border-radius: 20px;
-    border: 1px solid var(--bg-light);
-    background-color: var(--bg-dark);
+    border-radius: 22px; /* Super arredondado */
+    border: 1px solid #ccc;
+    background-color: var(--secondary-color); /* Branco dentro do input */
     color: var(--text-color);
     font-size: 1em;
 }
 
 .chat-input-area #send-btn {
-    padding: 12px 20px;
-    border-radius: 20px;
-    background-color: var(--primary-color);
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    border-radius: 50%; /* Botão redondo */
+    background-color: #25D366; /* Verde de envio */
     color: white;
     border: none;
     cursor: pointer;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.chat-input-area #send-btn:hover {
+    background-color: #128C7E;
 }
 
 .chat-input-area #send-btn:disabled {
-    background-color: #4b5563;
+    background-color: #B3E5C7;
     cursor: not-allowed;
+}
+
+/* Responsividade Básica (Ajuste a sidebar em telas pequenas) */
+@media (max-width: 768px) {
+    .chat-layout {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: 80px; /* Altura fixa em modo vertical */
+        padding: 10px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .sidebar header {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+    .sidebar button {
+        width: auto;
+        padding: 8px 15px;
+        margin-bottom: 0;
+    }
+    #conversation-history {
+        display: none; /* Esconde a lista de conversas no modo móvel para focar no chat */
+    }
+    .chat-main {
+        flex-grow: 1;
+        height: calc(100vh - 80px); /* Ajusta a altura da tela */
+    }
 }
