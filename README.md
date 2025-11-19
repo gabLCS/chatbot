@@ -360,11 +360,12 @@ Após a configuração do Nginx, acesse sua aplicação web pelo navegador sem e
 ```bash
 http://SEU_IP_PUBLICO
 ```
-
+Não esqueça de trocar a API_BASE para (= ''), 
 
 
 
 ---
+
 
 
 
